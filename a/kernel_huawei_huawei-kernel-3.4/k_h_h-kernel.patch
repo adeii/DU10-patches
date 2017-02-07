@@ -1,0 +1,15 @@
+
+project kernel/huawei/huawei-kernel-3.4/
+diff --git a/arch/arm/configs/u8833_defconfig b/arch/arm/configs/u8833_defconfig
+index eb7e0a0..8cf6b68 100644
+--- a/arch/arm/configs/u8833_defconfig
++++ b/arch/arm/configs/u8833_defconfig
+@@ -1213,7 +1213,7 @@ CONFIG_GENLOCK_MISCDEVICE=y
+ CONFIG_SYNC=y
+ CONFIG_SW_SYNC=y
+ CONFIG_SW_SYNC_USER=y
+-CONFIG_CMA=y
++CONFIG_CMA=n
+ # CONFIG_CMA_DEBUG is not set
+ 
+ #

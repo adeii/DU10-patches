@@ -1,0 +1,14 @@
+
+project packages/apps/Calendar/
+diff --git a/proguard.flags b/proguard.flags
+index bd7f0d5..8278992 100644
+--- a/proguard.flags
++++ b/proguard.flags
+@@ -39,3 +39,6 @@
+ -keepclassmembers class * implements android.content.SharedPreferences$Editor {
+   public *** apply();
+ }
++-dontwarn android.support.v7.**
++-dontwarn android.support.v7.widget.ViewStubCompat**
++-dontwarn android.support.v7.app.**
+\ No newline at end of file

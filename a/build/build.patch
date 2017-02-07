@@ -1,0 +1,106 @@
+
+project build/
+diff --git a/core/Makefile b/core/Makefile
+index e3f066d..59708bc 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -1049,10 +1049,10 @@ endif
+ 	$(hide) cp -r $(PRODUCT_OUT)/boot.img $(ota_temp_root)/BOOTABLE_IMAGES/
+ 	$(hide) cp -r $(PRODUCT_OUT)/recovery.img $(ota_temp_root)/BOOTABLE_IMAGES/
+ 	$(hide) ./build/tools/releasetools/make_recovery_patch $(ota_temp_root) $(ota_temp_root)
+-	$(hide) rm -f $(TARGET_OUT)/bin/install-recovery.sh
+-	$(hide) rm -f $(TARGET_OUT)/recovery-from-boot.p
+-	$(hide) cp $(ota_temp_root)/SYSTEM/bin/install-recovery.sh $(TARGET_OUT)/bin/install-recovery.sh
+-	$(hide) cp $(ota_temp_root)/SYSTEM/recovery-from-boot.p $(TARGET_OUT)/recovery-from-boot.p
++#	$(hide) rm -f $(TARGET_OUT)/bin/install-recovery.sh
++#	$(hide) rm -f $(TARGET_OUT)/recovery-from-boot.p
++#	$(hide) cp $(ota_temp_root)/SYSTEM/bin/install-recovery.sh $(TARGET_OUT)/bin/install-recovery.sh
++#	$(hide) cp $(ota_temp_root)/SYSTEM/recovery-from-boot.p $(TARGET_OUT)/recovery-from-boot.p
+ 
+ $(RECOVERY_RESOURCE_ZIP): $(INSTALLED_RECOVERYIMAGE_TARGET)
+ 	$(hide) mkdir -p $(dir $@)
+diff --git a/core/combo/arch/arm/armv7-a-neon.mk b/core/combo/arch/arm/armv7-a-neon.mk
+index 094814f..b2b8773 100644
+--- a/core/combo/arch/arm/armv7-a-neon.mk
++++ b/core/combo/arch/arm/armv7-a-neon.mk
+@@ -30,6 +30,11 @@ ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a7)
+ 	arch_variant_ldflags := \
+ 		-Wl,--no-fix-cortex-a8
+ else
++ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a5)
++	arch_variant_cflags := -mcpu=cortex-a5
++	arch_variant_ldflags := \
++		-Wl,--no-fix-cortex-a8
++else
+ 	arch_variant_cflags := -march=armv7-a
+ 	# Generic ARM might be a Cortex A8 -- better safe than sorry
+ 	arch_variant_ldflags := \
+@@ -37,7 +42,9 @@ else
+ endif
+ endif
+ endif
++endif
+ 
+ arch_variant_cflags += \
+     -mfloat-abi=softfp \
+-    -mfpu=neon
++     -mfpu=neon
++     #-mfpu=neon-vfpv4
+diff --git a/tools/releasetools/make_recovery_patch.py b/tools/releasetools/make_recovery_patch.py
+index 08d1450..e69de29 100755
+--- a/tools/releasetools/make_recovery_patch.py
++++ b/tools/releasetools/make_recovery_patch.py
+@@ -1,53 +0,0 @@
+-#!/usr/bin/env python
+-#
+-# Copyright (C) 2014 The Android Open Source Project
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-#      http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-
+-import sys
+-
+-if sys.hexversion < 0x02070000:
+-  print >> sys.stderr, "Python 2.7 or newer is required."
+-  sys.exit(1)
+-
+-import os
+-import common
+-
+-OPTIONS = common.OPTIONS
+-
+-def main(argv):
+-  # def option_handler(o, a):
+-  #   return False
+-
+-  args = common.ParseOptions(argv, __doc__)
+-  input_dir, output_dir = args
+-
+-  OPTIONS.info_dict = common.LoadInfoDict(input_dir)
+-
+-  recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
+-                                         input_dir, "RECOVERY")
+-  boot_img = common.GetBootableImage("boot.img", "boot.img",
+-                                     input_dir, "BOOT")
+-
+-  if not recovery_img or not boot_img:
+-    sys.exit(0)
+-
+-  def output_sink(fn, data):
+-    with open(os.path.join(output_dir, "SYSTEM", *fn.split("/")), "wb") as f:
+-      f.write(data)
+-
+-  common.MakeRecoveryPatch(input_dir, output_sink, recovery_img, boot_img)
+-
+-
+-if __name__ == '__main__':
+-  main(sys.argv[1:])

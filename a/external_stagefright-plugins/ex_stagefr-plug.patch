@@ -1,0 +1,193 @@
+
+project external/stagefright-plugins/
+diff --git a/extractor/Android.mk b/extractor/Android.mk
+deleted file mode 100644
+index ce7cb69..0000000
+--- a/extractor/Android.mk
++++ /dev/null
+@@ -1,46 +0,0 @@
+-LOCAL_PATH := $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-include external/ffmpeg/android/ffmpeg.mk
+-
+-LOCAL_SRC_FILES := \
+-	FFmpegExtractor.cpp
+-
+-LOCAL_C_INCLUDES += \
+-	$(LOCAL_PATH)/.. \
+-	$(TOP)/frameworks/native/include/media/openmax \
+-	$(TOP)/frameworks/av/include \
+-	$(TOP)/frameworks/av/media/libstagefright
+-
+-LOCAL_SHARED_LIBRARIES := \
+-	libutils          \
+-	libcutils         \
+-	libavcodec        \
+-	libavformat       \
+-	libavutil         \
+-	libffmpeg_utils   \
+-	libstagefright    \
+-	libstagefright_foundation
+-
+-LOCAL_MODULE:= libffmpeg_extractor
+-
+-LOCAL_MODULE_TAGS := optional
+-
+-ifneq ($(filter arm arm64,$(TARGET_ARCH)),)
+-	LOCAL_CFLAGS += -Wno-psabi
+-endif
+-
+-ifdef TARGET_2ND_ARCH
+-LOCAL_MODULE_PATH_32 := $(TARGET_OUT_VENDOR)/lib
+-LOCAL_MODULE_PATH_64 := $(TARGET_OUT_VENDOR)/lib64
+-else
+-LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
+-endif
+-
+-LOCAL_CFLAGS += -D__STDC_CONSTANT_MACROS=1 -D__STDINT_LIMITS=1
+-
+-#ifneq ($(filter arm arm64,$(TARGET_ARCH)),)
+-#	LOCAL_CFLAGS += -fpermissive
+-#endif
+-
+-include $(BUILD_SHARED_LIBRARY)
+diff --git a/extractor/FFmpegExtractor.cpp b/extractor/FFmpegExtractor.cpp
+index 937ccc7..30c94a4 100644
+--- a/extractor/FFmpegExtractor.cpp
++++ b/extractor/FFmpegExtractor.cpp
+@@ -2267,4 +2267,4 @@ extern "C" void getExtractorPlugin(android::MediaExtractor::Plugin *plugin)
+ {
+     plugin->sniff = android::SniffFFMPEG;
+     plugin->create = android::CreateFFmpegExtractor;
+-}
++}
+\ No newline at end of file
+diff --git a/extractor/FFmpegExtractor.h b/extractor/FFmpegExtractor.h
+index 8fe3d9a..1504521 100644
+--- a/extractor/FFmpegExtractor.h
++++ b/extractor/FFmpegExtractor.h
+@@ -144,4 +144,3 @@ bool SniffFFMPEG(
+ }  // namespace android
+ 
+ #endif  // SUPER_EXTRACTOR_H_
+-
+diff --git a/omx/Android.mk b/omx/Android.mk
+deleted file mode 100644
+index a3ab0e7..0000000
+--- a/omx/Android.mk
++++ /dev/null
+@@ -1,57 +0,0 @@
+-LOCAL_PATH := $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-include external/ffmpeg/android/ffmpeg.mk
+-
+-LOCAL_SRC_FILES := \
+-	FFmpegOMXPlugin.cpp \
+-	SoftFFmpegAudio.cpp \
+-	SoftFFmpegVideo.cpp
+-
+-LOCAL_C_INCLUDES += \
+-	$(LOCAL_PATH)/../include \
+-	$(LOCAL_PATH)/.. \
+-	$(TOP)/frameworks/native/include/media/hardware \
+-	$(TOP)/frameworks/native/include/media/openmax \
+-	$(TOP)/frameworks/av/include \
+-	$(TOP)/frameworks/av/media/libstagefright \
+-	$(TOP)/frameworks/av/media/libstagefright/include
+-
+-LOCAL_SHARED_LIBRARIES := \
+-	libdl             \
+-	libutils          \
+-	libcutils         \
+-	libavcodec		  \
+-	libavformat		  \
+-	libavutil		  \
+-	libffmpeg_utils   \
+-	libswresample     \
+-	libswscale        \
+-	libstagefright    \
+-	libstagefright_foundation \
+-	libstagefright_omx
+-
+-LOCAL_MODULE:= libffmpeg_omx
+-
+-LOCAL_MODULE_TAGS := optional
+-
+-ifdef TARGET_2ND_ARCH
+-LOCAL_MODULE_PATH_32 := $(TARGET_OUT_VENDOR)/lib
+-LOCAL_MODULE_PATH_64 := $(TARGET_OUT_VENDOR)/lib64
+-else
+-LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
+-endif
+-
+-ifneq ($(filter arm arm64,$(TARGET_ARCH)),)
+-	LOCAL_CFLAGS += -Wno-psabi
+-endif
+-
+-LOCAL_CFLAGS += -D__STDC_CONSTANT_MACROS=1 -D__STDINT_LIMITS=1
+-
+-#ifneq ($(filter arm arm64,$(TARGET_ARCH)),)
+-#	LOCAL_CFLAGS += -fpermissive
+-#endif
+-
+-include $(BUILD_SHARED_LIBRARY)
+-
+-include $(call first-makefiles-under,$(LOCAL_PATH))
+diff --git a/utils/Android.mk b/utils/Android.mk
+deleted file mode 100644
+index dd4e29d..0000000
+--- a/utils/Android.mk
++++ /dev/null
+@@ -1,50 +0,0 @@
+-LOCAL_PATH:= $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-include external/ffmpeg/android/ffmpeg.mk
+-
+-LOCAL_SRC_FILES := \
+-	ffmpeg_source.cpp \
+-	ffmpeg_utils.cpp \
+-	ffmpeg_cmdutils.c \
+-	codec_utils.cpp
+-
+-LOCAL_C_INCLUDES += \
+-	$(TOP)/frameworks/native/include/media/openmax \
+-	$(TOP)/frameworks/av/include \
+-	$(TOP)/frameworks/av/media/libstagefright
+-
+-LOCAL_SHARED_LIBRARIES := \
+-	libavcodec \
+-	libavformat \
+-	libavutil \
+-	libutils \
+-	libcutils \
+-	libstagefright \
+-	libstagefright_foundation
+-
+-LOCAL_MODULE := libffmpeg_utils
+-
+-LOCAL_MODULE_TAGS := optional
+-
+-ifdef TARGET_2ND_ARCH
+-LOCAL_MODULE_PATH_32 := $(TARGET_OUT_VENDOR)/lib
+-LOCAL_MODULE_PATH_64 := $(TARGET_OUT_VENDOR)/lib64
+-else
+-LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
+-endif
+-
+-LOCAL_CFLAGS += -D__STDC_CONSTANT_MACROS=1
+-
+-# Workaround for inline assembly tricks in FFMPEG which don't play nice with
+-# Clang when included from C++
+-LOCAL_CLANG_CFLAGS += -DAVUTIL_ARM_INTREADWRITE_H
+-
+-# Quiet some noise from FFMPEG
+-LOCAL_CLANG_CFLAGS += -Wno-unknown-attributes -Wno-deprecated-declarations
+-
+-#ifneq ($(filter arm arm64,$(TARGET_ARCH)),)
+-#	LOCAL_CFLAGS += -fpermissive
+-#endif
+-
+-include $(BUILD_SHARED_LIBRARY)

@@ -1,0 +1,13 @@
+
+project frameworks/base/
+diff --git a/packages/SystemUI/proguard.flags b/packages/SystemUI/proguard.flags
+index 59e5299..4d2723a 100644
+--- a/packages/SystemUI/proguard.flags
++++ b/packages/SystemUI/proguard.flags
+@@ -16,3 +16,6 @@
+ 
+ # org.dirtyunicorns.navigation trail-drawaing library fix
+ -dontwarn com.google.common.annotations.VisibleForTesting
++-dontwarn android.support.v7.**
++-dontwarn android.support.v7.widget.ViewStubCompat**
++-dontwarn android.support.v7.app.**

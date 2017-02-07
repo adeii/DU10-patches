@@ -1,0 +1,13 @@
+
+project vendor/du/
+diff --git a/caf-vendorsetup.sh b/caf-vendorsetup.sh
+index 5670847..d9d3d1a 100644
+--- a/caf-vendorsetup.sh
++++ b/caf-vendorsetup.sh
+@@ -9,3 +9,4 @@ add_lunch_combo du_m7vzw-userdebug
+ add_lunch_combo du_m8-userdebug
+ add_lunch_combo du_oneplus3-userdebug
+ add_lunch_combo du_Z00T-userdebug
++add_lunch_combo du_u8825-userdebug
++add_lunch_combo du_u8833-userdebug
++add_lunch_combo du_u8951-userdebug

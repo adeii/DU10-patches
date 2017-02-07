@@ -1,0 +1,1567 @@
+
+project device/huawei/msm7x27a-common/
+diff --git a/overlay/frameworks/base/core/res/res/values/config.xml b/overlay/frameworks/base/core/res/res/values/config.xml
+index 93b0c08..4b3f2ee 100644
+--- a/overlay/frameworks/base/core/res/res/values/config.xml
++++ b/overlay/frameworks/base/core/res/res/values/config.xml
+@@ -212,7 +212,7 @@
+ 
+     <!-- Older rotation sensors are not setting event.timestamp correctly. Setting to
+          true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
+-    <bool name="config_useSystemClockforRotationSensor">true</bool>
++    <!--bool name="config_useSystemClockforRotationSensor">true</bool-->
+ 
+     <!-- Integer indicating wpa_supplicant scan interval in milliseconds -->
+     <integer translatable="false" name="config_wifi_supplicant_scan_interval">60000</integer>
+diff --git a/patches/bionic/0001-cortex-a5-support.patch b/patches/bionic/0001-cortex-a5-support.patch
+deleted file mode 100644
+index d4ee898..0000000
+--- a/patches/bionic/0001-cortex-a5-support.patch
++++ /dev/null
+@@ -1,35 +0,0 @@
+-From 727b7d7e208c6f9e492bacb0a7bbf9ac9dbd3665 Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Mon, 2 Nov 2015 21:09:31 +0000
+-Subject: [PATCH] cortex-a5 support
+-
+-Change-Id: I9f4359a40e8832ea1b0a3d6feff691ecc380100d
+----
+- libc/arch-arm/arm.mk                 | 2 +-
+- libc/arch-arm/cortex-a5/cortex-a5.mk | 1 +
+- 2 files changed, 2 insertions(+), 1 deletion(-)
+- create mode 100644 libc/arch-arm/cortex-a5/cortex-a5.mk
+-
+-diff --git a/libc/arch-arm/arm.mk b/libc/arch-arm/arm.mk
+-index c2b80c5..b764e49 100644
+---- a/libc/arch-arm/arm.mk
+-+++ b/libc/arch-arm/arm.mk
+-@@ -51,7 +51,7 @@ ifeq ($(strip $(TARGET_$(my_2nd_arch_prefix)CPU_VARIANT)),)
+- endif
+- cpu_variant_mk := $(LOCAL_PATH)/arch-arm/$(TARGET_$(my_2nd_arch_prefix)CPU_VARIANT)/$(TARGET_$(my_2nd_arch_prefix)CPU_VARIANT).mk
+- ifeq ($(wildcard $(cpu_variant_mk)),)
+--$(error "TARGET_$(my_2nd_arch_prefix)CPU_VARIANT not set or set to an unknown value. Possible values are cortex-a7, cortex-a8, cortex-a9, cortex-a15, krait, scorpion, denver. Use generic for devices that do not have a CPU similar to any of the supported cpu variants.")
+-+$(error "TARGET_$(my_2nd_arch_prefix)CPU_VARIANT not set or set to an unknown value. Possible values are cortex-a5, cortex-a7, cortex-a8, cortex-a9, cortex-a15, krait, scorpion, denver. Use generic for devices that do not have a CPU similar to any of the supported cpu variants.")
+- endif
+- include $(cpu_variant_mk)
+- libc_common_additional_dependencies += $(cpu_variant_mk)
+-diff --git a/libc/arch-arm/cortex-a5/cortex-a5.mk b/libc/arch-arm/cortex-a5/cortex-a5.mk
+-new file mode 100644
+-index 0000000..944db2c
+---- /dev/null
+-+++ b/libc/arch-arm/cortex-a5/cortex-a5.mk
+-@@ -0,0 +1 @@
+-+include bionic/libc/arch-arm/cortex-a9/cortex-a9.mk
+--- 
+-2.8.3
+-
+diff --git a/patches/build/0001-msm7x27a-support.patch b/patches/build/0001-msm7x27a-support.patch
+deleted file mode 100644
+index afa238c..0000000
+--- a/patches/build/0001-msm7x27a-support.patch
++++ /dev/null
+@@ -1,38 +0,0 @@
+-From abdb81d3fad0e3c1ba2fe423851c2326943d6e72 Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Thu, 3 Dec 2015 12:24:11 +0000
+-Subject: [PATCH] msm7x27a support
+-
+-Change-Id: If7e92f7ce9f003a9b2b0aee35f38be1787d360ae
+----
+- core/qcom_target.mk | 2 +-
+- core/qcom_utils.mk  | 1 +
+- 2 files changed, 2 insertions(+), 1 deletion(-)
+-
+-diff --git a/core/qcom_target.mk b/core/qcom_target.mk
+-index 161241b..eaae5b4 100644
+---- a/core/qcom_target.mk
+-+++ b/core/qcom_target.mk
+-@@ -32,7 +32,7 @@ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+-     # Tell HALs that we're compiling an AOSP build with an in-line kernel
+-     TARGET_COMPILE_WITH_MSM_KERNEL := true
+- 
+--    ifneq ($(filter msm7x30 msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
+-+    ifneq ($(filter msm7x27a msm7x30 msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
+-         # Enable legacy graphics functions
+-         qcom_flags += -DQCOM_BSP_LEGACY
+-         # Enable legacy audio functions
+-diff --git a/core/qcom_utils.mk b/core/qcom_utils.mk
+-index 5e8a4a2..128a786 100755
+---- a/core/qcom_utils.mk
+-+++ b/core/qcom_utils.mk
+-@@ -1,5 +1,6 @@
+- # Board platforms lists to be used for
+- # TARGET_BOARD_PLATFORM specific featurization
+-+QCOM_BOARD_PLATFORMS += msm7x27a
+- QCOM_BOARD_PLATFORMS += msm7x30
+- QCOM_BOARD_PLATFORMS += msm8226
+- QCOM_BOARD_PLATFORMS += msm8610
+--- 
+-2.8.3
+-
+diff --git a/patches/build/0002-Add-cortex-a5-support.patch b/patches/build/0002-Add-cortex-a5-support.patch
+deleted file mode 100644
+index 4ef5108..0000000
+--- a/patches/build/0002-Add-cortex-a5-support.patch
++++ /dev/null
+@@ -1,37 +0,0 @@
+-From b72a58e6e91fbc41faae4af31a2843bdcb1c17aa Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Thu, 29 Oct 2015 11:48:03 +0000
+-Subject: [PATCH] Add cortex-a5 support
+-
+-Change-Id: I2b1260998b4560bfe46b37a06f817c35a846256d
+----
+- core/combo/arch/arm/armv7-a-neon.mk | 6 ++++++
+- 1 file changed, 6 insertions(+)
+-
+-diff --git a/core/combo/arch/arm/armv7-a-neon.mk b/core/combo/arch/arm/armv7-a-neon.mk
+-index 9154f71..f17f574 100644
+---- a/core/combo/arch/arm/armv7-a-neon.mk
+-+++ b/core/combo/arch/arm/armv7-a-neon.mk
+-@@ -32,6 +32,11 @@ ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a7)
+- 	arch_variant_ldflags := \
+- 		-Wl,--no-fix-cortex-a8
+- else
+-+ifeq ($(strip $(TARGET_$(combo_2nd_arch_prefix)CPU_VARIANT)),cortex-a5)
+-+	arch_variant_cflags := -mcpu=cortex-a5 -mfpu=neon-vfpv4
+-+	arch_variant_ldflags := \
+-+		-Wl,--no-fix-cortex-a8
+-+else
+- 	arch_variant_cflags := -march=armv7-a -mfpu=neon
+- 	# Generic ARM might be a Cortex A8 -- better safe than sorry
+- 	arch_variant_ldflags := \
+-@@ -40,6 +45,7 @@ endif
+- endif
+- endif
+- endif
+-+endif
+- 
+- arch_variant_cflags += \
+-     -mfloat-abi=softfp
+--- 
+-2.6.1
+-
+diff --git a/patches/build/0003-Remove-ethernet-permission.patch b/patches/build/0003-Remove-ethernet-permission.patch
+deleted file mode 100644
+index aa3704f..0000000
+--- a/patches/build/0003-Remove-ethernet-permission.patch
++++ /dev/null
+@@ -1,25 +0,0 @@
+-From b740b0099491fbe63c94ca60e87d73e0b760d0de Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Sun, 24 Apr 2016 13:06:16 +0100
+-Subject: [PATCH] Remove ethernet permission
+-
+-Change-Id: I0a28c30cdf3db78ee2833f79fb91b50fe3900e6e
+----
+- target/product/emulator.mk | 1 -
+- 1 file changed, 1 deletion(-)
+-
+-diff --git a/target/product/emulator.mk b/target/product/emulator.mk
+-index cca29ab..49c9cac 100644
+---- a/target/product/emulator.mk
+-+++ b/target/product/emulator.mk
+-@@ -51,7 +51,6 @@ PRODUCT_PACKAGES += \
+-     e2fsck
+- 
+- PRODUCT_COPY_FILES += \
+--    frameworks/native/data/etc/android.hardware.ethernet.xml:system/etc/permissions/android.hardware.ethernet.xml \
+-     device/generic/goldfish/fstab.goldfish:root/fstab.goldfish \
+-     device/generic/goldfish/init.goldfish.rc:root/init.goldfish.rc \
+-     device/generic/goldfish/init.goldfish.sh:system/etc/init.goldfish.sh \
+--- 
+-2.8.0
+-
+diff --git a/patches/external_wpa_supplicant_8/0001-reduce-scan-timeout.patch b/patches/external_wpa_supplicant_8/0001-reduce-scan-timeout.patch
+deleted file mode 100644
+index c7d7f8f..0000000
+--- a/patches/external_wpa_supplicant_8/0001-reduce-scan-timeout.patch
++++ /dev/null
+@@ -1,31 +0,0 @@
+-From d4e29720bc7ad6dc48bf7c202efc63bb798ffc3c Mon Sep 17 00:00:00 2001
+-From: Robin Humble <plaguedbypenguins@gmail.com>
+-Date: Sat, 20 Apr 2013 23:55:23 +1000
+-Subject: [PATCH] wpa_supplicant: reduce scan timeout to workaround ar6000
+- problem
+-
+-Ar6k hangs on the first scan after resume causing slow wifi reconnects
+-as wpa_supplicant must timeout (30s) and then retry. Work around the
+-binary module bug by setting the wpa_supplicant scan timeout to be much
+-shorter. Hopefully 5s is still long enough. Scans typically take 2-3s
+-on my network.
+----
+- src/drivers/driver_wext.c | 2 +-
+- 1 file changed, 1 insertion(+), 1 deletion(-)
+-
+-diff --git a/src/drivers/driver_wext.c b/src/drivers/driver_wext.c
+-index 701b7a3..ffcfe8a 100644
+---- a/src/drivers/driver_wext.c
+-+++ b/src/drivers/driver_wext.c
+-@@ -1065,7 +1065,7 @@ int wpa_driver_wext_scan(void *priv, struct wpa_driver_scan_params *params)
+- 		 * when scan is complete, so use longer timeout to avoid race
+- 		 * conditions with scanning and following association request.
+- 		 */
+--		timeout = 30;
+-+		timeout = 5;
+- 	}
+- 	wpa_printf(MSG_DEBUG, "Scan requested (ret=%d) - scan timeout %d "
+- 		   "seconds", ret, timeout);
+--- 
+-1.8.1.2
+-
+diff --git a/patches/frameworks_base/0001-allow-forcing-HighEndGfx-mode.patch b/patches/frameworks_base/0001-allow-forcing-HighEndGfx-mode.patch
+deleted file mode 100644
+index be2f3c9..0000000
+--- a/patches/frameworks_base/0001-allow-forcing-HighEndGfx-mode.patch
++++ /dev/null
+@@ -1,40 +0,0 @@
+-From 70f1abb3750b8ddc4fe5f00c41ee8c3f31670954 Mon Sep 17 00:00:00 2001
+-From: Andrew Sutherland <dr3wsuth3rland@gmail.com>
+-Date: Sun, 1 Dec 2013 03:29:19 -0600
+-Subject: [PATCH] allow forcing HighEndGfx mode
+-
+-people have already started fipping the lomRam prop to enable
+-transparent status bar, this will enable it with fewer
+-repercussions
+-
+-Change-Id: Ied6de65276425fa1e7db0bf9da35f1932a355172
+----
+- core/java/android/app/ActivityManager.java | 12 ++++++++++--
+- 1 file changed, 10 insertions(+), 2 deletions(-)
+-
+-diff --git a/core/java/android/app/ActivityManager.java b/core/java/android/app/ActivityManager.java
+-index 87c9efc2..6fdfd00 100644
+---- a/core/java/android/app/ActivityManager.java
+-+++ b/core/java/android/app/ActivityManager.java
+-@@ -525,8 +525,16 @@ public class ActivityManager {
+-      * @hide
+-      */
+-     static public boolean isHighEndGfx() {
+--        return !isLowRamDeviceStatic() &&
+--                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
+-+        return (!isLowRamDeviceStatic() &&
+-+                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel))
+-+                || isForcedHighEndGfx();
+-+    }
+-+
+-+    /**
+-+     * @hide
+-+     */
+-+    public static boolean isForcedHighEndGfx() {
+-+        return SystemProperties.getBoolean("persist.sys.force_highendgfx", false);
+-     }
+- 
+-     /**
+--- 
+-2.8.3
+-
+diff --git a/patches/frameworks_native/0001-Select-texture-target-based-on-pixel-format.patch b/patches/frameworks_native/0001-Select-texture-target-based-on-pixel-format.patch
+deleted file mode 100644
+index a12d14b..0000000
+--- a/patches/frameworks_native/0001-Select-texture-target-based-on-pixel-format.patch
++++ /dev/null
+@@ -1,201 +0,0 @@
+-From 48457637927a60a57885a87cffa2a92602c3b681 Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Fri, 13 Feb 2015 20:16:18 +0000
+-Subject: [PATCH] Select texture target based on pixel format
+-
+-Adreno is not optimized for GL_TEXTURE_EXTERNAL_OES, making GPU
+-utilization (and power), high with GL_TEXTURE_EXTERNAL_OES for
+-RGB formats.
+-
+-Change texture target from GL_EXTERNAL_TEXTURE_OES to dynamically
+-select between GL_EXTERNAL_TEXTURE_OES, and GL_TEXTURE_2D based
+-on the pixel format.
+-
+-This change is done to reduce the composition time for 8x55
+-
+-Change-Id: I6675eec6802caa0f862dd551608e4cc92a6b61bb
+----
+- include/gui/GLConsumer.h                           |  6 ++++
+- libs/gui/Android.mk                                |  4 +++
+- services/surfaceflinger/Android.mk                 |  4 +++
+- services/surfaceflinger/Layer.cpp                  |  6 ++++
+- .../RenderEngine/GLES11RenderEngine.cpp            |  6 ++++
+- services/surfaceflinger/SurfaceFlingerConsumer.cpp | 33 ++++++++++++++++++++++
+- services/surfaceflinger/SurfaceFlingerConsumer.h   |  8 ++++++
+- 7 files changed, 67 insertions(+)
+-
+-diff --git a/include/gui/GLConsumer.h b/include/gui/GLConsumer.h
+-index c35c7be..3a63a0e 100644
+---- a/include/gui/GLConsumer.h
+-+++ b/include/gui/GLConsumer.h
+-@@ -419,7 +419,13 @@ private:
+-     // glCopyTexSubImage to read from the texture.  This is a hack to work
+-     // around a GL driver limitation on the number of FBO attachments, which the
+-     // browser's tile cache exceeds.
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+protected:
+-+    uint32_t mTexTarget;
+-+private:
+-+#else
+-     const uint32_t mTexTarget;
+-+#endif
+- 
+-     // EGLSlot contains the information and object references that
+-     // GLConsumer maintains about a BufferQueue buffer slot.
+-diff --git a/libs/gui/Android.mk b/libs/gui/Android.mk
+-index 76aec6e..40d77ac 100644
+---- a/libs/gui/Android.mk
+-+++ b/libs/gui/Android.mk
+-@@ -95,6 +95,10 @@ ifeq ($(TARGET_NO_SENSOR_PERMISSION_CHECK),true)
+- LOCAL_CPPFLAGS += -DNO_SENSOR_PERMISSION_CHECK
+- endif
+- 
+-+ifeq ($(BOARD_ADRENO_DECIDE_TEXTURE_TARGET),true)
+-+	LOCAL_CFLAGS += -DDECIDE_TEXTURE_TARGET
+-+endif
+-+
+- include $(BUILD_SHARED_LIBRARY)
+- 
+- ifeq (,$(ONE_SHOT_MAKEFILE))
+-diff --git a/services/surfaceflinger/Android.mk b/services/surfaceflinger/Android.mk
+-index 01f99ed..8d7be05 100644
+---- a/services/surfaceflinger/Android.mk
+-+++ b/services/surfaceflinger/Android.mk
+-@@ -98,6 +98,10 @@ ifeq ($(BOARD_USE_BGRA_8888),true)
+-     LOCAL_CFLAGS += -DUSE_BGRA_8888
+- endif
+- 
+-+ifeq ($(BOARD_ADRENO_DECIDE_TEXTURE_TARGET),true)
+-+    LOCAL_CFLAGS += -DDECIDE_TEXTURE_TARGET
+-+endif
+-+
+- LOCAL_CFLAGS += -fvisibility=hidden -Werror=format
+- LOCAL_CFLAGS += -std=c++11
+- 
+-diff --git a/services/surfaceflinger/Layer.cpp b/services/surfaceflinger/Layer.cpp
+-index 7b972b1..924be6c 100644
+---- a/services/surfaceflinger/Layer.cpp
+-+++ b/services/surfaceflinger/Layer.cpp
+-@@ -1394,8 +1394,14 @@ Region Layer::latchBuffer(bool& recomputeVisibleRegions)
+-             maxFrameNumber = mLastFrameNumberReceived;
+-         }
+- 
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+        status_t updateResult = mSurfaceFlingerConsumer->updateTexImage(&r,
+-+                mFlinger->mPrimaryDispSync, maxFrameNumber, &mTexture);
+-+#else
+-         status_t updateResult = mSurfaceFlingerConsumer->updateTexImage(&r,
+-                 mFlinger->mPrimaryDispSync, maxFrameNumber);
+-+#endif
+-+
+-         if (updateResult == BufferQueue::PRESENT_LATER) {
+-             // Producer doesn't want buffer to be displayed yet.  Signal a
+-             // layer update so we check again at the next opportunity.
+-diff --git a/services/surfaceflinger/RenderEngine/GLES11RenderEngine.cpp b/services/surfaceflinger/RenderEngine/GLES11RenderEngine.cpp
+-index 853a4eb..7295b6c 100644
+---- a/services/surfaceflinger/RenderEngine/GLES11RenderEngine.cpp
+-+++ b/services/surfaceflinger/RenderEngine/GLES11RenderEngine.cpp
+-@@ -202,8 +202,14 @@ void GLES11RenderEngine::setupLayerTexturing(const Texture& texture) {
+-     glMatrixMode(GL_TEXTURE);
+-     glLoadMatrixf(texture.getMatrix().asArray());
+-     glMatrixMode(GL_MODELVIEW);
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+    glDisable((target == Texture::TEXTURE_2D) ?
+-+            GL_TEXTURE_EXTERNAL_OES : GL_TEXTURE_2D);
+-+    glEnable(target);
+-+#else
+-     glDisable(GL_TEXTURE_2D);
+-     glEnable(GL_TEXTURE_EXTERNAL_OES);
+-+#endif
+- }
+- 
+- void GLES11RenderEngine::setupLayerBlackedOut() {
+-diff --git a/services/surfaceflinger/SurfaceFlingerConsumer.cpp b/services/surfaceflinger/SurfaceFlingerConsumer.cpp
+-index ed1f31b..4b976e0 100644
+---- a/services/surfaceflinger/SurfaceFlingerConsumer.cpp
+-+++ b/services/surfaceflinger/SurfaceFlingerConsumer.cpp
+-@@ -27,13 +27,24 @@
+- #include <utils/NativeHandle.h>
+- #include <utils/Trace.h>
+- 
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+#include <GLES2/gl2.h>
+-+#include <GLES2/gl2ext.h>
+-+#endif
+-+
+- namespace android {
+- 
+- // ---------------------------------------------------------------------------
+- 
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+status_t SurfaceFlingerConsumer::updateTexImage(BufferRejecter* rejecter,
+-+        const DispSync& dispSync, uint64_t maxFrameNumber, Texture* mTexture)
+-+{
+-+#else
+- status_t SurfaceFlingerConsumer::updateTexImage(BufferRejecter* rejecter,
+-         const DispSync& dispSync, uint64_t maxFrameNumber)
+- {
+-+#endif
+-     ATRACE_CALL();
+-     ALOGV("updateTexImage");
+-     Mutex::Autolock lock(mMutex);
+-@@ -78,6 +89,28 @@ status_t SurfaceFlingerConsumer::updateTexImage(BufferRejecter* rejecter,
+-         return BUFFER_REJECTED;
+-     }
+- 
+-+    #ifdef DECIDE_TEXTURE_TARGET
+-+    // GPU is not efficient in handling GL_TEXTURE_EXTERNAL_OES
+-+    // texture target. Depending on the image format, decide,
+-+    // the texture target to be used
+-+    if (mTexture) {
+-+        switch (mSlots[buf].mGraphicBuffer->format) {
+-+            case HAL_PIXEL_FORMAT_RGBA_8888:
+-+            case HAL_PIXEL_FORMAT_RGBX_8888:
+-+            case HAL_PIXEL_FORMAT_RGB_888:
+-+            case HAL_PIXEL_FORMAT_RGB_565:
+-+            case HAL_PIXEL_FORMAT_BGRA_8888:
+-+                mTexture->init(Texture::TEXTURE_2D, mTexture->getTextureName());
+-+                mTexTarget = GL_TEXTURE_2D;
+-+                break;
+-+            default:
+-+                mTexture->init(Texture::TEXTURE_EXTERNAL, mTexture->getTextureName());
+-+                mTexTarget = GL_TEXTURE_EXTERNAL_OES;
+-+                break;
+-+        }
+-+    }
+-+#endif
+-+
+-     // Release the previous buffer.
+-     err = updateAndReleaseLocked(item);
+-     if (err != NO_ERROR) {
+-diff --git a/services/surfaceflinger/SurfaceFlingerConsumer.h b/services/surfaceflinger/SurfaceFlingerConsumer.h
+-index 779e5b7..6394aae 100644
+---- a/services/surfaceflinger/SurfaceFlingerConsumer.h
+-+++ b/services/surfaceflinger/SurfaceFlingerConsumer.h
+-@@ -19,6 +19,9 @@
+- 
+- #include "DispSync.h"
+- #include <gui/GLConsumer.h>
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+#include "RenderEngine/Texture.h"
+-+#endif
+- 
+- namespace android {
+- // ----------------------------------------------------------------------------
+-@@ -56,8 +59,13 @@ public:
+-     // reject the newly acquired buffer.  Unlike the GLConsumer version,
+-     // this does not guarantee that the buffer has been bound to the GL
+-     // texture.
+-+#ifdef DECIDE_TEXTURE_TARGET
+-+    status_t updateTexImage(BufferRejecter* rejecter, const DispSync& dispSync,
+-+            uint64_t maxFrameNumber = 0, Texture* mTexture = 0);
+-+#else
+-     status_t updateTexImage(BufferRejecter* rejecter, const DispSync& dispSync,
+-             uint64_t maxFrameNumber = 0);
+-+#endif
+- 
+-     // See GLConsumer::bindTextureImageLocked().
+-     status_t bindTextureImage();
+--- 
+-2.8.3
+-
+diff --git a/patches/packages_apps_Settings/0001-Add-setting-for-vold-Internal-External-switchable-SD.patch b/patches/packages_apps_Settings/0001-Add-setting-for-vold-Internal-External-switchable-SD.patch
+deleted file mode 100644
+index b59ea67..0000000
+--- a/patches/packages_apps_Settings/0001-Add-setting-for-vold-Internal-External-switchable-SD.patch
++++ /dev/null
+@@ -1,167 +0,0 @@
+-From 68939f13b7480ac793c35b8d837221b0fc8bd888 Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Thu, 23 Jun 2016 12:21:19 +0100
+-Subject: [PATCH] Add setting for vold Internal/External switchable SD
+-
+-Change-Id: I30a8d630d9b8b2e3bba3a28e582e6fbf54f18549
+----
+- res/values/slim_strings.xml                        |  8 ++++
+- res/xml/device_info_storage.xml                    | 10 +++++
+- .../settings/deviceinfo/StorageSettings.java       | 43 +++++++++++++++++++++-
+- 3 files changed, 60 insertions(+), 1 deletion(-)
+-
+-diff --git a/res/values/slim_strings.xml b/res/values/slim_strings.xml
+-index 91c976a..fa76198 100644
+---- a/res/values/slim_strings.xml
+-+++ b/res/values/slim_strings.xml
+-@@ -228,6 +228,14 @@
+-     <string name="restarting_ui">Restarting UI\u2026</string>
+-     <string name="lcd_density_prompt_message">Some apps may not function at non-standard dpi.\n\nThis will restart your phone.</string>
+- 
+-+    <!-- Vold Switchable SD -->
+-+    <string name="storage_switchable_title">Switchable Internal/External SD</string>	
+-+    <string name="storage_switch_title">Use external SD as primary</string>
+-+    <string name="storage_switch_summary_off">Using expanded internal storage for apps and media</string>
+-+    <string name="storage_switch_summary_on">Using SD Card for apps and media</string>
+-+    <string name="reboot_prompt_title">Reboot required</string>
+-+    <string name="reboot_prompt_message">In order to apply the changed configuration, a reboot is required.\n\nDo you want to reboot now?</string>
+-+
+-     <!-- Wakeup options -->
+-     <string name="display_category_wakeup_options_title">Wakeup options</string>
+-     <string name="wakeup_when_plugged_unplugged_title">Wake up on charge</string>
+-diff --git a/res/xml/device_info_storage.xml b/res/xml/device_info_storage.xml
+-index 19c5982..3b3387a 100644
+---- a/res/xml/device_info_storage.xml
+-+++ b/res/xml/device_info_storage.xml
+-@@ -21,6 +21,16 @@
+-     settings:keywords="@string/keywords_storage">
+- 
+-     <PreferenceCategory
+-+        android:key="storage_switchable"
+-+        android:title="@string/storage_switchable_title" />
+-+
+-+    <SwitchPreference
+-+        android:key="key_switch_storage"
+-+        android:title="@string/storage_switch_title"
+-+        android:summaryOn="@string/storage_switch_summary_on"
+-+        android:summaryOff="@string/storage_switch_summary_off" />
+-+
+-+    <PreferenceCategory
+-         android:key="storage_internal"
+-         android:title="@string/storage_internal_title" />
+- 
+-diff --git a/src/com/android/settings/deviceinfo/StorageSettings.java b/src/com/android/settings/deviceinfo/StorageSettings.java
+-index c36d0df..09fd33b 100644
+---- a/src/com/android/settings/deviceinfo/StorageSettings.java
+-+++ b/src/com/android/settings/deviceinfo/StorageSettings.java
+-@@ -27,14 +27,17 @@ import android.graphics.Color;
+- import android.graphics.drawable.Drawable;
+- import android.os.AsyncTask;
+- import android.os.Bundle;
+-+import android.os.PowerManager;
+- import android.os.storage.DiskInfo;
+- import android.os.storage.StorageEventListener;
+- import android.os.storage.StorageManager;
+- import android.os.storage.VolumeInfo;
+- import android.os.storage.VolumeRecord;
+-+import android.os.SystemProperties;
+- import android.preference.Preference;
+- import android.preference.PreferenceCategory;
+- import android.preference.PreferenceScreen;
+-+import android.preference.SwitchPreference;
+- import android.text.TextUtils;
+- import android.text.format.Formatter;
+- import android.text.format.Formatter.BytesResult;
+-@@ -76,11 +79,16 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
+- 
+-     private StorageManager mStorageManager;
+- 
+-+    private PreferenceCategory mSwitchableCategory;
+-     private PreferenceCategory mInternalCategory;
+-     private PreferenceCategory mExternalCategory;
+- 
+-     private StorageSummaryPreference mInternalSummary;
+- 
+-+    private static final String KEY_SWITCH_STORAGE = "key_switch_storage";
+-+    private static final String VOLD_SWITCH_PERSIST_PROP = "persist.sys.vold.switchexternal";
+-+    private SwitchPreference mSwitchStoragePref;
+-+
+-     @Override
+-     protected int getMetricsCategory() {
+-         return MetricsLogger.DEVICEINFO_STORAGE;
+-@@ -102,6 +110,9 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
+- 
+-         addPreferencesFromResource(R.xml.device_info_storage);
+- 
+-+        mSwitchStoragePref = (SwitchPreference) findPreference(KEY_SWITCH_STORAGE);
+-+
+-+        mSwitchableCategory = (PreferenceCategory) findPreference("storage_switchable");
+-         mInternalCategory = (PreferenceCategory) findPreference("storage_internal");
+-         mExternalCategory = (PreferenceCategory) findPreference("storage_external");
+- 
+-@@ -133,9 +144,14 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
+-         final Context context = getActivity();
+- 
+-         getPreferenceScreen().removeAll();
+-+        mSwitchableCategory.removeAll();
+-         mInternalCategory.removeAll();
+-         mExternalCategory.removeAll();
+- 
+-+        String voldswitch = SystemProperties.get(VOLD_SWITCH_PERSIST_PROP, "0");
+-+        mSwitchStoragePref.setChecked("1".equals(voldswitch));
+-+        mSwitchableCategory.addPreference(mSwitchStoragePref);
+-+
+-         mInternalCategory.addPreference(mInternalSummary);
+- 
+-         int privateCount = 0;
+-@@ -215,6 +231,8 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
+-                     -1, 0, args);
+-             finish();
+-         }
+-+
+-+        getPreferenceScreen().addPreference(mSwitchableCategory);
+-     }
+- 
+-     @Override
+-@@ -233,7 +251,13 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
+-     @Override
+-     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference pref) {
+-         final String key = pref.getKey();
+--        if (pref instanceof StorageVolumePreference) {
+-+        if(pref == mSwitchStoragePref) {
+-+            Log.d(TAG,"Setting persist.sys.vold.switchexternal to "+(
+-+                    mSwitchStoragePref.isChecked() ? "1" : "0"));
+-+            SystemProperties.set(VOLD_SWITCH_PERSIST_PROP,
+-+                    mSwitchStoragePref.isChecked() ? "1" : "0");
+-+            showRebootPrompt();
+-+        } else if (pref instanceof StorageVolumePreference) {
+-             // Picked a normal volume
+-             final VolumeInfo vol = mStorageManager.findVolumeById(key);
+- 
+-@@ -282,6 +306,23 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
+-         return false;
+-     }
+- 
+-+    private void showRebootPrompt() {
+-+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+-+                .setTitle(R.string.reboot_prompt_title)
+-+                .setMessage(R.string.reboot_prompt_message)
+-+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+-+                    @Override
+-+                    public void onClick(DialogInterface dialog, int which) {
+-+                        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+-+                        pm.reboot(null);
+-+                    }
+-+                })
+-+                .setNegativeButton(R.string.no, null)
+-+                .create();
+-+
+-+        dialog.show();
+-+    }
+-+
+-     public static class MountTask extends AsyncTask<Void, Void, Exception> {
+-         private final Context mContext;
+-         private final StorageManager mStorageManager;
+--- 
+-2.9.0
+-
+diff --git a/patches/system_netd/0001-Update-Huawei-SoftapControllerATH-for-5.0.patch b/patches/system_netd/0001-Update-Huawei-SoftapControllerATH-for-5.0.patch
+deleted file mode 100644
+index e98a158..0000000
+--- a/patches/system_netd/0001-Update-Huawei-SoftapControllerATH-for-5.0.patch
++++ /dev/null
+@@ -1,924 +0,0 @@
+-From e829dd6b641b4785dbccd668e4669f29c09f59cb Mon Sep 17 00:00:00 2001
+-From: Kyle Harrison <khwebmail@gmail.com>
+-Date: Mon, 24 Nov 2014 15:47:03 +0000
+-Subject: [PATCH] Update Huawei SoftapControllerATH for 5.0
+-
+----
+- server/Android.mk              |  13 +-
+- server/CommandListener.cpp     |   8 +
+- server/SoftapController.h      |   8 +
+- server/SoftapControllerATH.cpp | 819 +++++++++++++++++++++++++++++++++++++++++
+- 4 files changed, 846 insertions(+), 2 deletions(-)
+- create mode 100644 server/SoftapControllerATH.cpp
+-
+-diff --git a/server/Android.mk b/server/Android.mk
+-index 2548df4..a4ae153 100644
+---- a/server/Android.mk
+-+++ b/server/Android.mk
+-@@ -23,7 +23,7 @@ LOCAL_C_INCLUDES := \
+-         system/netd/include \
+- 
+- LOCAL_CLANG := true
+--LOCAL_CPPFLAGS := -std=c++11 -Wall -Werror
+-+LOCAL_CPPFLAGS := -std=c++11 -Wall -Werror -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function
+- LOCAL_MODULE := netd
+- 
+- LOCAL_SHARED_LIBRARIES := \
+-@@ -67,7 +67,6 @@ LOCAL_SRC_FILES := \
+-         QtiConnectivityAdapter.cpp \
+-         ResolverController.cpp \
+-         RouteController.cpp \
+--        SoftapController.cpp \
+-         StrictController.cpp \
+-         TetherController.cpp \
+-         UidRanges.cpp \
+-@@ -86,6 +85,16 @@ ifeq ($(BOARD_HAS_QCOM_WLAN), true)
+-   LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/sdk/softap/include
+- endif
+- 
+-+ifeq ($(BOARD_HAS_ATH_WLAN),true)
+-+  LOCAL_CFLAGS += -DATH_WLAN
+-+  LOCAL_CFLAGS += -DWIFI_MODULE_PATH=\"$(WIFI_DRIVER_MODULE_PATH)\"
+-+  LOCAL_C_INCLUDES += external/wpa_supplicant_8/wpa_supplicant/src/common
+-+  LOCAL_SRC_FILES += SoftapControllerATH.cpp
+-+  LOCAL_SHARED_LIBRARIES := $(LOCAL_SHARED_LIBRARIES) libwpa_client
+-+else
+-+   LOCAL_SRC_FILES += SoftapController.cpp
+-+endif
+-+
+- include $(BUILD_EXECUTABLE)
+- 
+- include $(CLEAR_VARS)
+-diff --git a/server/CommandListener.cpp b/server/CommandListener.cpp
+-index 895090a..081dffc 100755
+---- a/server/CommandListener.cpp
+-+++ b/server/CommandListener.cpp
+-@@ -802,6 +802,14 @@ int CommandListener::SoftapCmd::runCommand(SocketClient *cli,
+-         qccmd = 1;
+-     }
+-     else if (!strcmp(argv[1], "startap")) {
+-+    
+-+#elseif defined(ATH_WLAN)
+-+    if (!strcmp(argv[1], "start")) {
+-+        rc = sSoftapCtrl->startDriver(argv[2]);
+-+    } else if (!strcmp(argv[1], "stop")) {
+-+        rc = sSoftapCtrl->stopDriver(argv[2]);
+-+    } else if (!strcmp(argv[1], "startap")) {
+-+
+- #else
+-     if (!strcmp(argv[1], "startap")) {
+- #endif
+-diff --git a/server/SoftapController.h b/server/SoftapController.h
+-index efc19e3..5f8c5c4 100755
+---- a/server/SoftapController.h
+-+++ b/server/SoftapController.h
+-@@ -34,6 +34,10 @@ public:
+-     SoftapController(SocketListener *sl);
+-     virtual ~SoftapController();
+- 
+-+#ifdef ATH_WLAN
+-+    int startDriver(const char *iface);
+-+    int stopDriver(const char *iface);
+-+#endif
+-     int startSoftap();
+-     int stopSoftap();
+-     bool isSoftapStarted();
+-@@ -46,6 +50,10 @@ private:
+-     int mThreadErr;
+-     bool mHostapdFlag;
+- #endif
+-+#ifdef ATH_WLAN
+-+    char mBuf[SOFTAP_MAX_BUFFER_SIZE];
+-+    char mIface[IFNAMSIZ];
+-+#endif
+-     pid_t mPid;
+-     void generatePsk(char *ssid, char *passphrase, char *psk);
+- #ifdef LIBWPA_CLIENT_EXISTS
+-diff --git a/server/SoftapControllerATH.cpp b/server/SoftapControllerATH.cpp
+-new file mode 100644
+-index 0000000..fe34d81
+---- /dev/null
+-+++ b/server/SoftapControllerATH.cpp
+-@@ -0,0 +1,819 @@
+-+/*
+-+ * Copyright (C) 2008 The Android Open Source Project
+-+ *
+-+ * Licensed under the Apache License, Version 2.0 (the "License");
+-+ * you may not use this file except in compliance with the License.
+-+ * You may obtain a copy of the License at
+-+ *
+-+ *      http://www.apache.org/licenses/LICENSE-2.0
+-+ *
+-+ * Unless required by applicable law or agreed to in writing, software
+-+ * distributed under the License is distributed on an "AS IS" BASIS,
+-+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-+ * See the License for the specific language governing permissions and
+-+ * limitations under the License.
+-+ */
+-+
+-+#include <stdlib.h>
+-+#include <errno.h>
+-+#include <fcntl.h>
+-+#include <string.h>
+-+
+-+#include <sys/socket.h>
+-+#include <sys/stat.h>
+-+#include <sys/ioctl.h>
+-+#include <sys/types.h>
+-+#include <sys/wait.h>
+-+
+-+#include <netinet/in.h>
+-+#include <arpa/inet.h>
+-+
+-+#include <linux/wireless.h>
+-+
+-+#include <openssl/evp.h>
+-+#include <openssl/sha.h>
+-+
+-+#define LOG_TAG "SoftapController"
+-+#include <cutils/log.h>
+-+
+-+#include "SoftapController.h"
+-+#include "ResponseCode.h"
+-+
+-+extern "C" int delete_module(const char *, unsigned int);
+-+extern "C" int init_module(void * , unsigned int, const char *);
+-+extern "C" void *load_file(const char *fn, unsigned *_sz);
+-+
+-+extern "C" int ifc_init();
+-+extern "C" int ifc_up(const char *name);
+-+
+-+#include "private/android_filesystem_config.h"
+-+#include "cutils/properties.h"
+-+#ifdef HAVE_LIBC_SYSTEM_PROPERTIES
+-+#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
+-+#endif
+-+
+-+#include <sys/system_properties.h>
+-+#include "wpa_ctrl.h"
+-+
+-+static const char IFACE_DIR[]           = "/data/misc/wifi/hostapd";
+-+static const char HOSTAPD_NAME[]     = "hostapd";
+-+static const char HOSTAPD_CONFIG_TEMPLATE[]= "/system/etc/wifi/hostapd.conf";
+-+static const char HOSTAPD_CONFIG_FILE[]    = "/data/misc/wifi/hostapd.conf";
+-+static const char HOSTAPD_PROP_NAME[]      = "init.svc.hostapd";
+-+
+-+#ifdef WIFI_DRIVER_MODULE_AP_ARG
+-+static const char DRIVER_MODULE_AP_ARG[] = WIFI_DRIVER_MODULE_AP_ARG;
+-+#endif
+-+
+-+#define WIFI_DEFAULT_BI         100         /* in TU */
+-+#define WIFI_DEFAULT_DTIM       1           /* in beacon */
+-+#define WIFI_DEFAULT_CHANNEL    6
+-+#define WIFI_DEFAULT_MAX_STA    8
+-+#define WIFI_DEFAULT_PREAMBLE   0
+-+
+-+static struct wpa_ctrl *ctrl_conn;
+-+static char iface[PROPERTY_VALUE_MAX];
+-+int mProfileValid;
+-+
+-+/* rfkill support borrowed from bluetooth */
+-+static int rfkill_id = -1;
+-+static char *rfkill_state_path = NULL;
+-+
+-+static int init_rfkill() {
+-+    char path[64];
+-+    char buf[16];
+-+    int fd;
+-+    int sz;
+-+    int id;
+-+    for (id = 0; ; id++) {
+-+        snprintf(path, sizeof(path), "/sys/class/rfkill/rfkill%d/type", id);
+-+        fd = open(path, O_RDONLY);
+-+        if (fd < 0) {
+-+            ALOGW("open(%s) failed: %s (%d)\n", path, strerror(errno), errno);
+-+            return -1;
+-+        }
+-+        sz = read(fd, &buf, sizeof(buf));
+-+        close(fd);
+-+        if (sz >= 4 && memcmp(buf, "wlan", 4) == 0) {
+-+            rfkill_id = id;
+-+            break;
+-+        }
+-+    }
+-+
+-+    asprintf(&rfkill_state_path, "/sys/class/rfkill/rfkill%d/state", rfkill_id);
+-+    return 0;
+-+}
+-+
+-+static int check_wifi_power() {
+-+    int sz;
+-+    int fd = -1;
+-+    int ret = -1;
+-+    char buffer;
+-+
+-+    if (rfkill_id == -1) {
+-+        if (init_rfkill()) goto out;
+-+    }
+-+
+-+    fd = open(rfkill_state_path, O_RDONLY);
+-+    if (fd < 0) {
+-+        ALOGE("open(%s) failed: %s (%d)", rfkill_state_path, strerror(errno),
+-+                errno);
+-+        goto out;
+-+    }
+-+    sz = read(fd, &buffer, 1);
+-+    if (sz != 1) {
+-+        ALOGE("read(%s) failed: %s (%d)", rfkill_state_path, strerror(errno),
+-+                errno);
+-+        goto out;
+-+    }
+-+
+-+    switch (buffer) {
+-+        case '1':
+-+            ret = 1;
+-+            break;
+-+        case '0':
+-+            ret = 0;
+-+            break;
+-+    }
+-+
+-+out:
+-+    if (fd >= 0) close(fd);
+-+    return ret;
+-+}
+-+
+-+static int set_wifi_power(int on) {
+-+    int sz;
+-+    int fd = -1;
+-+    int ret = -1;
+-+    const char buffer = (on ? '1' : '0');
+-+
+-+    if (rfkill_id == -1) {
+-+        if (init_rfkill()) goto out;
+-+    }
+-+
+-+    if (check_wifi_power() == on) {
+-+        return 0;
+-+    }
+-+
+-+    fd = open(rfkill_state_path, O_WRONLY);
+-+    if (fd < 0) {
+-+        ALOGE("open(%s) for write failed: %s (%d)", rfkill_state_path,
+-+                strerror(errno), errno);
+-+        goto out;
+-+    }
+-+    /* Give it a few seconds before changing state */
+-+    sleep(3);
+-+    sz = write(fd, &buffer, 1);
+-+    if (sz < 0) {
+-+        ALOGE("write(%s) failed: %s (%d)", rfkill_state_path, strerror(errno),
+-+                errno);
+-+        goto out;
+-+    }
+-+    ret = 0;
+-+
+-+out:
+-+    if (fd >= 0) close(fd);
+-+    return ret;
+-+}
+-+
+-+/* end rfkill support */
+-+
+-+int ensure_config_file_exists()
+-+{
+-+    char buf[2048];
+-+    int srcfd, destfd;
+-+    int nread;
+-+
+-+    if (access(HOSTAPD_CONFIG_FILE, R_OK|W_OK) == 0) {
+-+        return 0;
+-+    } else if (errno != ENOENT) {
+-+        ALOGE("Cannot access \"%s\": %s", HOSTAPD_CONFIG_FILE, strerror(errno));
+-+        return -1;
+-+    }
+-+
+-+    srcfd = open(HOSTAPD_CONFIG_TEMPLATE, O_RDONLY);
+-+    if (srcfd < 0) {
+-+        ALOGE("Cannot open \"%s\": %s", HOSTAPD_CONFIG_TEMPLATE, strerror(errno));
+-+        return -1;
+-+    }
+-+
+-+    destfd = open(HOSTAPD_CONFIG_FILE, O_CREAT|O_WRONLY, 0660);
+-+    if (destfd < 0) {
+-+        close(srcfd);
+-+        ALOGE("Cannot create \"%s\": %s", HOSTAPD_CONFIG_FILE, strerror(errno));
+-+        return -1;
+-+    }
+-+
+-+    while ((nread = read(srcfd, buf, sizeof(buf))) != 0) {
+-+        if (nread < 0) {
+-+            ALOGE("Error reading \"%s\": %s", HOSTAPD_CONFIG_TEMPLATE, strerror(errno));
+-+            close(srcfd);
+-+            close(destfd);
+-+            unlink(HOSTAPD_CONFIG_FILE);
+-+            return -1;
+-+        }
+-+        write(destfd, buf, nread);
+-+    }
+-+
+-+    close(destfd);
+-+    close(srcfd);
+-+
+-+    if (chown(HOSTAPD_CONFIG_FILE, AID_SYSTEM, AID_WIFI) < 0) {
+-+        ALOGE("Error changing group ownership of %s to %d: %s",
+-+             HOSTAPD_CONFIG_FILE, AID_WIFI, strerror(errno));
+-+        unlink(HOSTAPD_CONFIG_FILE);
+-+        return -1;
+-+    }
+-+
+-+    return 0;
+-+}
+-+
+-+int wifi_start_hostapd()
+-+{
+-+    char supp_status[PROPERTY_VALUE_MAX] = {'\0'};
+-+    int count = 300; /* wait at most 30 seconds for completion */
+-+    char mac_buff[15] = {'\0'};
+-+#ifdef HAVE_LIBC_SYSTEM_PROPERTIES
+-+    const prop_info *pi;
+-+    unsigned serial = 0;
+-+#endif
+-+
+-+    /* Check whether already running */
+-+    if (property_get(HOSTAPD_PROP_NAME, supp_status, NULL)
+-+            && strcmp(supp_status, "running") == 0) {
+-+        return 0;
+-+    }
+-+
+-+    /* Clear out any stale socket files that might be left over. */
+-+    wpa_ctrl_cleanup();
+-+
+-+#ifdef HAVE_LIBC_SYSTEM_PROPERTIES
+-+    /*
+-+     * Get a reference to the status property, so we can distinguish
+-+     * the case where it goes stopped => running => stopped (i.e.,
+-+     * it start up, but fails right away) from the case in which
+-+     * it starts in the stopped state and never manages to start
+-+     * running at all.
+-+     */
+-+    pi = __system_property_find(HOSTAPD_PROP_NAME);
+-+    if (pi != NULL) {
+-+        serial = __system_property_serial(pi);
+-+    }
+-+#endif
+-+    property_set("ctl.start", HOSTAPD_NAME);
+-+    sched_yield();
+-+
+-+    while (count-- > 0) {
+-+#ifdef HAVE_LIBC_SYSTEM_PROPERTIES
+-+        if (pi == NULL) {
+-+            pi = __system_property_find(HOSTAPD_PROP_NAME);
+-+        }
+-+        if (pi != NULL) {
+-+            __system_property_read(pi, NULL, supp_status);
+-+            if (strcmp(supp_status, "running") == 0) {
+-+                return 0;
+-+            } else if (__system_property_serial(pi) != serial &&
+-+                    strcmp(supp_status, "stopped") == 0) {
+-+                return -1;
+-+            }
+-+        }
+-+#endif
+-+        usleep(100000);
+-+    }
+-+    return -1;
+-+}
+-+
+-+int wifi_stop_hostapd()
+-+{
+-+    char supp_status[PROPERTY_VALUE_MAX] = {'\0'};
+-+    int count = 50; /* wait at most 5 seconds for completion */
+-+
+-+    /* Check whether hostapd already stopped */
+-+    if (property_get(HOSTAPD_PROP_NAME, supp_status, NULL)
+-+        && strcmp(supp_status, "stopped") == 0) {
+-+        return 0;
+-+    }
+-+
+-+    property_set("ctl.stop", HOSTAPD_NAME);
+-+    sched_yield();
+-+
+-+    while (count-- > 0) {
+-+        if (property_get(HOSTAPD_PROP_NAME, supp_status, NULL)) {
+-+            if (strcmp(supp_status, "stopped") == 0)
+-+                return 0;
+-+        }
+-+        usleep(100000);
+-+    }
+-+    return -1;
+-+}
+-+
+-+int wifi_connect_to_hostapd()
+-+{
+-+    char ifname[256];
+-+    char supp_status[PROPERTY_VALUE_MAX] = {'\0'};
+-+    int connretry = 15; /* 1500 ms */
+-+
+-+    /* Make sure hostapd is running */
+-+    if (!property_get(HOSTAPD_PROP_NAME, supp_status, NULL)
+-+            || strcmp(supp_status, "running") != 0) {
+-+        ALOGE("Supplicant not running, cannot connect");
+-+        return -1;
+-+    }
+-+
+-+    strcpy(iface, "eth0");
+-+    snprintf(ifname, sizeof(ifname), "%s/%s", IFACE_DIR, iface);
+-+    ALOGD("ifname = %s\n", ifname);
+-+
+-+    { /* check iface file is ready */
+-+        int cnt = 160; /* 8 seconds (160*50)*/
+-+        sched_yield();
+-+        while ( access(ifname, F_OK|W_OK)!=0 && cnt-- > 0) {
+-+            usleep(50000);
+-+        }
+-+        if (access(ifname, F_OK|W_OK)==0) {
+-+            snprintf(ifname, sizeof(ifname), "%s/%s", IFACE_DIR, iface);
+-+            ALOGD("ifname %s is ready to read/write cnt=%d\n", ifname, cnt);
+-+        } else {
+-+            strlcpy(ifname, iface, sizeof(ifname));
+-+            ALOGD("ifname %s is not ready, cnt=%d\n", ifname, cnt);
+-+        }
+-+    }
+-+
+-+    while (--connretry && (ctrl_conn = wpa_ctrl_open(ifname)) == NULL) {
+-+        usleep(100000);
+-+    }
+-+
+-+    if (ctrl_conn == NULL) {
+-+        ALOGE("Unable to open connection to hostapd on \"%s\": %s",
+-+             ifname, strerror(errno));
+-+        return -1;
+-+    }
+-+
+-+    if (wpa_ctrl_attach(ctrl_conn) != 0) {
+-+        wpa_ctrl_close(ctrl_conn);
+-+        ctrl_conn = NULL;
+-+        return -1;
+-+    }
+-+    return 0;
+-+}
+-+
+-+void wifi_close_hostapd_connection()
+-+{
+-+    if (ctrl_conn != NULL) {
+-+        wpa_ctrl_close(ctrl_conn);
+-+        ctrl_conn = NULL;
+-+    }
+-+}
+-+
+-+int wifi_load_profile(bool started)
+-+{
+-+    if ((started) && (mProfileValid)) {
+-+        if (ctrl_conn == NULL) {
+-+            return -1;
+-+        }
+-+    }
+-+    return 0;
+-+}
+-+
+-+static int insmod(const char *filename, const char *args)
+-+{
+-+    void *module;
+-+    unsigned int size;
+-+    int ret;
+-+
+-+    module = load_file(filename, &size);
+-+    if (!module)
+-+        return -1;
+-+
+-+    ret = init_module(module, size, args);
+-+
+-+    free(module);
+-+
+-+    return ret;
+-+}
+-+
+-+static int rmmod(const char *modname)
+-+{
+-+    int ret = -1;
+-+    int maxtry = 10;
+-+
+-+    while (maxtry-- > 0) {
+-+        ret = delete_module(modname, O_NONBLOCK | O_EXCL);
+-+        if (ret < 0 && errno == EAGAIN)
+-+            usleep(500000);
+-+        else
+-+            break;
+-+    }
+-+
+-+    if (ret != 0)
+-+        ALOGD("Unable to unload driver module \"%s\": %s\n",
+-+                modname, strerror(errno));
+-+    return ret;
+-+}
+-+
+-+SoftapController::SoftapController(SocketListener *sl)
+-+    : mPid(0) {
+-+    mSpsl = sl;
+-+    memset(mIface, 0, sizeof(mIface));
+-+    mProfileValid = 0;
+-+    ctrl_conn = NULL;
+-+}
+-+
+-+SoftapController::~SoftapController() {
+-+}
+-+
+-+#if 0
+-+int SoftapController::getPrivFuncNum(char *iface, const char *fname) {
+-+    struct iwreq wrq;
+-+    struct iw_priv_args *priv_ptr;
+-+    int i, ret;
+-+
+-+    strncpy(wrq.ifr_name, iface, sizeof(wrq.ifr_name));
+-+    wrq.u.data.pointer = mBuf;
+-+    wrq.u.data.length = sizeof(mBuf) / sizeof(struct iw_priv_args);
+-+    wrq.u.data.flags = 0;
+-+    if ((ret = ioctl(mSock, SIOCGIWPRIV, &wrq)) < 0) {
+-+        ALOGE("SIOCGIPRIV failed: %d", ret);
+-+        return ret;
+-+    }
+-+    priv_ptr = (struct iw_priv_args *)wrq.u.data.pointer;
+-+    for(i=0;(i < wrq.u.data.length);i++) {
+-+        if (strcmp(priv_ptr[i].name, fname) == 0)
+-+            return priv_ptr[i].cmd;
+-+    }
+-+    return -1;
+-+}
+-+#endif
+-+
+-+int SoftapController::startDriver(const char *iface) {
+-+    struct iwreq wrq;
+-+    int fnum, ret;
+-+
+-+    ALOGD("startDriver()");
+-+
+-+    if (!iface || (iface[0] == '\0')) {
+-+        ALOGD("Softap driver start - wrong interface");
+-+        iface = mIface;
+-+    }
+-+
+-+#ifdef WIFI_MODULE_PATH
+-+    rmmod("ar6000");
+-+#ifdef WIFI_DRIVER_MODULE_AP_ARG
+-+    ret = insmod(WIFI_MODULE_PATH, DRIVER_MODULE_AP_ARG);
+-+#else
+-+    ret = insmod(WIFI_MODULE_PATH, "");
+-+#endif
+-+    sleep(1);
+-+#else
+-+    set_wifi_power(0);
+-+    {
+-+        int fd = -1;
+-+        char buffer;
+-+
+-+        fd = open("/sys/module/ar6000/parameters/ifname", O_RDWR);
+-+        if (fd < 0) {
+-+            ALOGE("failed to open interface name");
+-+            ret = -1;
+-+        }
+-+        if (read(fd, &buffer, 1) != 1) {
+-+            ALOGE("failed to get interface name");
+-+            ret = -1;
+-+        }
+-+        if (buffer != 'a' && write(fd, "eth0", 6) > 0) {
+-+            ALOGD("interface renamed for AP mode");
+-+            usleep(500000); /* Give it a while after a name change... */
+-+            ret = set_wifi_power(1);
+-+        } else if (buffer == 'a') {
+-+            ALOGD("interface already named for AP mode");
+-+            ret = 0;
+-+        } else {
+-+            ALOGE("failed to change interface name - %c",buffer);
+-+            ret = -2;
+-+        }
+-+        close(fd);
+-+    }
+-+#endif
+-+
+-+    if (ret) {
+-+        ALOGE("Softap driver start failed");
+-+        return -1;
+-+    }
+-+
+-+    /* Before starting the daemon, make sure its config file exists */
+-+    ret =ensure_config_file_exists();
+-+    if (ret < 0) {
+-+        ALOGE("Softap driver start - configuration file missing");
+-+        return -1;
+-+    }
+-+    /* Indicate interface down */
+-+
+-+    ALOGD("Softap driver start: %d", ret);
+-+    return ret;
+-+}
+-+
+-+int SoftapController::stopDriver(const char *iface) {
+-+    struct iwreq wrq;
+-+    int fnum, ret;
+-+
+-+    ALOGD("stopDriver()");
+-+
+-+    ALOGE("softapcontroller->stopDriver");
+-+    if (!iface || (iface[0] == '\0')) {
+-+        ALOGD("Softap driver stop - wrong interface");
+-+        iface = mIface;
+-+    }
+-+    ret = 0;
+-+#ifdef WIFI_MODULE_PATH
+-+    rmmod("ar6000");
+-+    ret = insmod(WIFI_MODULE_PATH, "");
+-+    sleep(1);
+-+#else
+-+    ret = set_wifi_power(0);
+-+    if (!ret) {
+-+        int fd = -1;
+-+        char buffer;
+-+
+-+        fd = open("/sys/module/ar6000/parameters/ifname", O_RDWR);
+-+        if (fd < 0) {
+-+            ALOGE("failed to open interface name");
+-+            ret = -1;
+-+        }
+-+        if (read(fd, &buffer, 1) != 1) {
+-+            ALOGE("failed to get interface name");
+-+            ret = -1;
+-+        }
+-+        if (buffer != 'w' && write(fd, "wlan0", 5) > 0) {
+-+            ALOGD("interface renamed for STA mode");
+-+            usleep(500000); /* Give it a while after a name change... */
+-+            ret = 0;
+-+        } else if (buffer == 'w') {
+-+            ALOGD("interface already named for STA mode");
+-+            ret = 0;
+-+        } else {
+-+            ALOGE("failed to change interface name - %c",buffer);
+-+            ret = -2;
+-+        }
+-+        close(fd);
+-+    }
+-+#endif
+-+
+-+    ALOGD("Softap driver stop: %d", ret);
+-+    return ret;
+-+}
+-+
+-+int SoftapController::startSoftap() {
+-+    struct iwreq wrq;
+-+    pid_t pid = 1;
+-+    int fnum, ret;
+-+
+-+    ALOGD("startSoftap()");
+-+
+-+    if (mPid) {
+-+        ALOGE("SoftAP is already running");
+-+        return ResponseCode::SoftapStatusResult;
+-+    }
+-+
+-+    if (!mPid) {
+-+        ALOGW("Softap driver not started - loading now");
+-+        startDriver("eth0");
+-+    }
+-+#if 0
+-+   if ((pid = fork()) < 0) {
+-+        ALOGE("fork failed (%s)", strerror(errno));
+-+        return -1;
+-+    }
+-+#endif
+-+    /* system("iwpriv wl0.1 AP_BSS_START"); */
+-+    if (!pid) {
+-+        /* start hostapd */
+-+        return ResponseCode::ServiceStartFailed;
+-+    } else {
+-+        ifc_init();
+-+        ifc_up("eth0");
+-+        sleep(1); /* Give the driver time to settle... */
+-+
+-+        ret = wifi_start_hostapd();
+-+        if (ret < 0) {
+-+            ALOGE("Softap startap - starting hostapd fails");
+-+            stopDriver("eth0");
+-+            return ResponseCode::ServiceStartFailed;
+-+        }
+-+
+-+        sched_yield();
+-+        usleep(100000);
+-+
+-+        ret = wifi_connect_to_hostapd();
+-+        if (ret < 0) {
+-+            ALOGE("Softap startap - connect to hostapd fails");
+-+            return ResponseCode::ServiceStartFailed;
+-+        }
+-+
+-+        /* Indicate interface up */
+-+
+-+        ret = wifi_load_profile(true);
+-+        if (ret < 0) {
+-+            ALOGE("Softap startap - load new configuration fails");
+-+            return ResponseCode::ServiceStartFailed;
+-+        }
+-+        if (ret) {
+-+            ALOGE("Softap startap - failed: %d", ret);
+-+        }
+-+        else {
+-+           mPid = pid;
+-+           ALOGD("Softap startap - Ok");
+-+           usleep(AP_BSS_START_DELAY);
+-+        }
+-+    }
+-+
+-+    return ResponseCode::SoftapStatusResult;
+-+}
+-+
+-+int SoftapController::stopSoftap() {
+-+    struct iwreq wrq;
+-+    int fnum, ret;
+-+
+-+    ALOGD("stopSoftap()");
+-+
+-+    if (mPid == 0) {
+-+        ALOGE("SoftAP is not running");
+-+        return ResponseCode::SoftapStatusResult;
+-+    }
+-+    wifi_close_hostapd_connection();
+-+    ret = wifi_stop_hostapd();
+-+    mPid = 0;
+-+    ALOGD("Softap service stopped: %d", ret);
+-+
+-+#ifndef WIFI_MODULE_PATH
+-+    set_wifi_power(0);
+-+    {
+-+        int fd = -1;
+-+        char buffer;
+-+
+-+        fd = open("/sys/module/ar6000/parameters/ifname", O_RDWR);
+-+        if (fd < 0) {
+-+            ALOGE("failed to open interface name");
+-+            ret = -1;
+-+        }
+-+        if (read(fd, &buffer, 1) != 1) {
+-+            ALOGE("failed to get interface name");
+-+            ret = -1;
+-+        }
+-+        if (buffer != 'w' && write(fd, "wlan0", 5) > 0) {
+-+            ALOGD("interface renamed for STA mode");
+-+            usleep(500000); /* Give it a while after a name change... */
+-+            ret = 0;
+-+        } else if (buffer == 'w') {
+-+            ALOGD("interface already named for STA mode");
+-+            ret = 0;
+-+        } else {
+-+            ALOGE("failed to change interface name - %c",buffer);
+-+            ret = -2;
+-+        }
+-+        close(fd);
+-+    }
+-+#endif
+-+    usleep(AP_BSS_STOP_DELAY);
+-+    return ResponseCode::SoftapStatusResult;
+-+}
+-+
+-+bool SoftapController::isSoftapStarted() {
+-+    return (mPid != 0);
+-+}
+-+
+-+/*
+-+ * Arguments:
+-+ *	argv[2] - wlan interface
+-+ *	argv[3] - SSID
+-+ *	argv[4] - Broadcast/Hidden
+-+ *	argv[5] - Channel
+-+ *	argv[6] - Security
+-+ *	argv[7] - Key
+-+ */
+-+int SoftapController::setSoftap(int argc, char *argv[]) {
+-+    unsigned char psk[SHA256_DIGEST_LENGTH];
+-+    char psk_str[2*SHA256_DIGEST_LENGTH+1];
+-+    struct iwreq wrq;
+-+    int fnum, ret, i = 0;
+-+    char *ssid;
+-+    int fd;
+-+    char buf[80];
+-+    int len;
+-+
+-+    ALOGD("setSoftap()");
+-+
+-+    if (argc < 4) {
+-+        ALOGE("Softap set - missing arguments");
+-+        return ResponseCode::CommandSyntaxError;
+-+    }
+-+
+-+    fd = open(HOSTAPD_CONFIG_FILE, O_CREAT|O_WRONLY|O_TRUNC, 0660);
+-+    if (fd < 0) {
+-+        ALOGE("Cannot create \"%s\": %s", HOSTAPD_CONFIG_FILE, strerror(errno));
+-+        return ResponseCode::OperationFailed;
+-+    }
+-+    if (chown(HOSTAPD_CONFIG_FILE, AID_SYSTEM, AID_WIFI) < 0) {
+-+        ALOGE("Error changing group ownership of %s to %d: %s",
+-+            HOSTAPD_CONFIG_FILE, AID_WIFI, strerror(errno));
+-+        return ResponseCode::OperationFailed;
+-+    }
+-+    if (chmod(HOSTAPD_CONFIG_FILE, 0660) < 0) {
+-+        ALOGE("Error changing permission of %s to %d: %s",
+-+            HOSTAPD_CONFIG_FILE, AID_WIFI, strerror(errno));
+-+        return ResponseCode::OperationFailed;
+-+    }
+-+
+-+    len = snprintf(buf, sizeof(buf), "interface=eth0\n");
+-+    write(fd, buf, len);
+-+    len = snprintf(buf, sizeof(buf), "ctrl_interface=%s\n",IFACE_DIR);
+-+    write(fd, buf, len);
+-+    if (argc > 3) {
+-+        len = snprintf(buf, sizeof(buf), "ssid=%s\n",argv[3]);
+-+    } else {
+-+        len = snprintf(buf, sizeof(buf), "ssid=AndroidAP\n");
+-+    }
+-+    /* set open auth */
+-+    write(fd, buf, len);
+-+    len = snprintf(buf, sizeof(buf), "auth_algs=1\n");
+-+    write(fd, buf, len);
+-+    len = snprintf(buf, sizeof(buf), "max_num_sta=%d\n",WIFI_DEFAULT_MAX_STA);
+-+    write(fd, buf, len);
+-+    len = snprintf(buf, sizeof(buf), "beacon_int=%d\n",WIFI_DEFAULT_BI);
+-+    write(fd, buf, len);
+-+    len = snprintf(buf, sizeof(buf), "dtim_period=%d\n",WIFI_DEFAULT_DTIM);
+-+    write(fd, buf, len);
+-+    if (argc > 4) {
+-+        if (strncmp(argv[6], "wpa2-psk", 8) == 0) {
+-+            len = snprintf(buf, sizeof(buf), "wpa=2\n");
+-+            write(fd, buf, len);
+-+            len = snprintf(buf, sizeof(buf), "wpa_key_mgmt=WPA-PSK\n");
+-+            write(fd, buf, len);
+-+            len = snprintf(buf, sizeof(buf), "wpa_pairwise=CCMP\n");
+-+            write(fd, buf, len);
+-+            if (argc > 5) {
+-+                len = snprintf(buf, sizeof(buf), "wpa_passphrase=%s\n",argv[7]);
+-+                write(fd, buf, len);
+-+            } else {
+-+                len = snprintf(buf, sizeof(buf), "wpa_passphrase=12345678\n");
+-+                write(fd, buf, len);
+-+            }
+-+        }
+-+    }
+-+    if (argc > 6) {
+-+        len = snprintf(buf, sizeof(buf), "channel=%s\n",argv[5]);
+-+        write(fd, buf, len);
+-+    } else {
+-+        len = snprintf(buf, sizeof(buf), "channel=%d\n",WIFI_DEFAULT_CHANNEL);
+-+        write(fd, buf, len);
+-+    }
+-+        len = snprintf(buf, sizeof(buf), "driver=nl80211\n");
+-+        write(fd, buf, len);
+-+
+-+        len = snprintf(buf, sizeof(buf), "hw_mode=g\n");
+-+        write(fd, buf, len);
+-+
+-+    /*if (argc > 7) {
+-+        len = snprintf(buf, sizeof(buf), "preamble=%s\n",argv[7]);
+-+        write(fd, buf, len);
+-+    } else {
+-+        len = snprintf(buf, sizeof(buf), "preamble=%d\n",WIFI_DEFAULT_PREAMBLE);
+-+        write(fd, buf, len);
+-+    }*/
+-+    mProfileValid = 1;
+-+
+-+    close(fd);
+-+
+-+    ret = wifi_load_profile(isSoftapStarted());
+-+    if (ret < 0) {
+-+        ALOGE("Softap set - load new configuration fails");
+-+        return ResponseCode::OperationFailed;
+-+    }
+-+    if (ret) {
+-+        ALOGE("Softap set - failed: %d", ret);
+-+        return ResponseCode::OperationFailed;
+-+    }
+-+
+-+    ALOGD("Softap set - Ok");
+-+    usleep(AP_SET_CFG_DELAY);
+-+    return ResponseCode::SoftapStatusResult;
+-+}
+-+
+-+/*
+-+ * Arguments:
+-+ *	argv[2] - interface name
+-+ *	argv[3] - AP or STA
+-+ */
+-+int SoftapController::fwReloadSoftap(int argc, char *argv[])
+-+{
+-+    struct iwreq wrq;
+-+    int fnum, i = 0;
+-+    char *iface;
+-+
+-+    ALOGD("fwReloadSoftap()");
+-+
+-+    if (argc < 4) {
+-+        ALOGE("Softap fwreload - missing arguments");
+-+        return ResponseCode::CommandSyntaxError;
+-+    }
+-+    ALOGD("Softap fwReload - Ok");
+-+    return ResponseCode::SoftapStatusResult;
+-+} 
+--- 
+-2.6.1
+-
